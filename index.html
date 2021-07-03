@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="js/main.js"></script>
+    <link rel="stylesheet" href="styles/main.css">
     <title>Список покупок</title>
 </head>
 <body>
@@ -16,7 +17,12 @@
     </h5>
     <div class="mainContainer">
         <div class="newPurchaseField">
-            
+            <input type="text" placeholder="Название покупки" class="newPurchase">
+            <input type="text" placeholder="Цена" class="newPurchase">
+            <input type="text" placeholder="Количество" class="newPurchase">
+            <input type="text" disabled value="0" class="newPurchase">
+            <button class="addNewPurchaseBtn">Добавить покупку</button>
+
         </div>
         <div class="purchasesList">
 

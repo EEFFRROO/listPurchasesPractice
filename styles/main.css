@@ -1,0 +1,40 @@
+body {
+    background-color: lightgray;
+}
+.purchaseItem {
+    display: inline-block;
+    padding: 5px;
+    border: 3px solid black;
+    margin-right: -3px;
+    margin-bottom: 5px;
+    width: 20%;
+    background-color: lightgreen;
+    text-shadow: 1px 1px 4px black;
+    /* color: brown; */
+}
+
+.purchaseHeader {
+    font-weight: bold;
+    background-color: green;
+    text-shadow: 2px 2px 2px black;
+    color: white;
+}
+
+.finalName {
+    width: calc(60% + 26px);
+    background-color: lightblue;
+}
+
+.finalPrice {
+    background-color: lightblue;
+}
+
+.newPurchase {
+    padding: 5px;
+    margin-bottom: 10px;
+
+}
+
+button {
+    
+}
