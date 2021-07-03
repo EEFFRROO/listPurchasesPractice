@@ -8,8 +8,8 @@ $(document).ready(() => {
     const amountPurchase = $(".amountNewPurchase")[0];
     const totalNewPurchase = $(".totalNewPurchase")[0];
 
-    $(".priceNewPurchase").on("input", changeTotal);
-    $(".amountNewPurchase").on("input", changeTotal);
+    $(".priceNewPurchase").on("input", changeNewPurchaseTotal);
+    $(".amountNewPurchase").on("input", changeNewPurchaseTotal);
     // amountPurchase.onchange = changeTotal;
 
 
@@ -23,6 +23,10 @@ $(document).ready(() => {
         createNewPurchase("Чипсы", 105, 3);
         createNewPurchase("Большая пачка чипсов", 55, 4);
         createFinal();
+    }
+
+    function addPurchaseToStorage(name, price, amount, total) {
+        // code...
     }
 
     function clickAddNewPurchase() {
@@ -43,7 +47,7 @@ $(document).ready(() => {
         }
     }
 
-    function changeTotal() {
+    function changeNewPurchaseTotal() {
         price = pricePurchase.value;
         amount = amountPurchase.value;
         if (!isNaN(parseFloat(price)) && !isNaN(parseInt(amount))) {
@@ -52,10 +56,20 @@ $(document).ready(() => {
     }
 
     function createNewPurchase(name, price, amount, header = null) {
+        randId = parseInt(Math.random() * 10000);
+        while ($("#" + randId).length)
+            randId = parseInt(Math.random() * 10000);
         purchase = createDiv(null, "purchase");
+        purchase.id = randId;
+        deleteBtn = null;
         if (!header) {
             headerClass = "";
             purchaseTotal = createDiv(parseFloat(price) * parseInt(amount), "purchaseItem total");
+            deleteBtn = $(`<button class='purchaseItem ${randId} deleteBtn'>X</button>`);
+            deleteBtn.click((deleteBtn) => {
+                $("#" + deleteBtn.target.classList[1]).remove();
+                createFinal();
+            });
         } else {
             headerClass = " purchaseHeader";
             purchaseTotal = createDiv(header, "purchaseItem" + headerClass);
@@ -67,7 +81,9 @@ $(document).ready(() => {
         purchase.append(purchasePrice);
         purchase.append(purchaseAmount);
         purchase.append(purchaseTotal);
-        // console.log(purchase);
+        if (deleteBtn) {
+            purchase.append(deleteBtn[0]);
+        }
         $(".purchasesList").append(purchase);
     }
 

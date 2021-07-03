@@ -16,6 +16,16 @@ body {
     font-size: 35px;
 }
 
+button.purchaseItem {
+    width: auto;
+    background-color: red;
+}
+
+button.purchaseItem:hover {
+    background-color: darkred;
+}
+
+
 .purchaseHeader {
     font-weight: bold;
     background-color: green;
