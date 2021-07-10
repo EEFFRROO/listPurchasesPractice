@@ -16,17 +16,46 @@ $(document).ready(() => {
     $(".addNewPurchaseBtn").click(clickAddNewPurchase);
 
     function main() {
-        createNewPurchase("Название", "Цена", "Количество", "Стоимость");
-
-
-        createNewPurchase("Помидоры", 57, 2);
-        createNewPurchase("Чипсы", 105, 3);
-        createNewPurchase("Большая пачка чипсов", 55, 4);
+        readFromStorage();
         createFinal();
     }
 
-    function addPurchaseToStorage(name, price, amount, total) {
-        // code...
+    function readFromStorage() {
+        let storage = localStorage.getItem("purchases");
+        if (storage) {
+            storage = JSON.parse(storage);
+            for (let i = 0; i < storage.length; i++) {
+                createNewPurchase(storage[i].name, storage[i].price, storage[i].amount, storage[i].id);
+            }
+        }
+    }
+
+    function addPurchaseToStorage(name, price, amount, id) {
+        let storage = localStorage.getItem("purchases");
+        if (!storage) {
+            storage = [];
+        } else {
+            storage = JSON.parse(storage);
+        }
+        data = { name: name, price: price, amount: amount, id: id };
+        storage.push(data);
+        storage = JSON.stringify(storage);
+        localStorage.setItem("purchases", storage);
+    }
+
+    function deletePurchaseFromStorage(id) {
+        let storage = localStorage.getItem("purchases");
+        if (storage) {
+            storage = JSON.parse(storage);
+            tempStorage = [];
+            for (let i = 0; i < storage.length; i++) {
+                if (storage[i].id != id) {
+                    tempStorage.push(storage[i]);
+                }
+            }
+        }
+        tempStorage = JSON.stringify(tempStorage);
+        localStorage.setItem("purchases", tempStorage);
     }
 
     function clickAddNewPurchase() {
@@ -36,7 +65,12 @@ $(document).ready(() => {
             else if (isNaN(parseInt(amountPurchase.value)))
                 alert("Неверное введено количество");
             else {
-                createNewPurchase(namePurchase.value, pricePurchase.value, amountPurchase.value);
+                randId = parseInt(Math.random() * 10000);
+                while ($("#" + randId).length) {
+                    randId = parseInt(Math.random() * 10000);
+                }
+                addPurchaseToStorage(namePurchase.value, pricePurchase.value, amountPurchase.value, randId);
+                createNewPurchase(namePurchase.value, pricePurchase.value, amountPurchase.value, randId);
                 createFinal();
                 namePurchase.value = "";
                 pricePurchase.value = "";
@@ -55,50 +89,56 @@ $(document).ready(() => {
         }
     }
 
-    function createNewPurchase(name, price, amount, header = null) {
-        randId = parseInt(Math.random() * 10000);
-        while ($("#" + randId).length)
-            randId = parseInt(Math.random() * 10000);
-        purchase = createDiv(null, "purchase");
+    function createNewPurchase(name, price, amount, randId) {
+        let total = parseFloat(price) * parseInt(amount);
+        let tbody = $(".purchasesList tbody")[0];
+        purchase = createTr();
         purchase.id = randId;
-        deleteBtn = null;
-        if (!header) {
-            headerClass = "";
-            purchaseTotal = createDiv(parseFloat(price) * parseInt(amount), "purchaseItem total");
-            deleteBtn = $(`<button class='purchaseItem ${randId} deleteBtn'>X</button>`);
-            deleteBtn.click((deleteBtn) => {
-                $("#" + deleteBtn.target.classList[1]).remove();
-                createFinal();
-            });
-        } else {
-            headerClass = " purchaseHeader";
-            purchaseTotal = createDiv(header, "purchaseItem" + headerClass);
-        }
-        purchaseName = createDiv(name, "purchaseItem" + headerClass);
-        purchasePrice = createDiv(price, "purchaseItem" + headerClass);
-        purchaseAmount = createDiv(amount, "purchaseItem" + headerClass);
+        editTd = createTd();
+        editBtn = $(`<button class='purchaseItem ${randId} editBtn btn btn-outline-success px-2.5' disabled>&#9998;</button>`);
+        editBtn.click((editBtn) => {
+            $("#" + editBtn.target.classList[1]).remove();
+            createFinal();
+        });
+        editTd.className = "p-0"
+        editTd.append(editBtn[0]);
+        deleteTd = createTd();
+        deleteBtn = $(`<button class='purchaseItem ${randId} deleteBtn btn btn-outline-danger px-3'>&#10008;</button>`);
+        deleteBtn.click((deleteBtn) => {
+            $("#" + deleteBtn.target.classList[1]).remove();
+            deletePurchaseFromStorage(deleteBtn.target.classList[1]);
+            createFinal();
+        });
+        deleteTd.className = "p-0"
+        deleteTd.append(deleteBtn[0]);
+        purchaseName = createTd(name, "purchaseItem");
+        purchasePrice = createTd(price, "purchaseItem");
+        purchaseAmount = createTd(amount, "purchaseItem");
+        purchaseTotal = createTd(total, "purchaseItem total");
         purchase.append(purchaseName);
         purchase.append(purchasePrice);
         purchase.append(purchaseAmount);
         purchase.append(purchaseTotal);
-        if (deleteBtn) {
-            purchase.append(deleteBtn[0]);
-        }
-        $(".purchasesList").append(purchase);
+        purchase.append(editTd);
+        purchase.append(deleteTd);
+        tbody.append(purchase);
     }
 
     function createFinal() {
+        let tbody = $('.purchasesList tbody')[0];
         $(".finalPurchase").remove();
-        purchase = createDiv(null, "finalPurchase purchase");
-        finalName = createDiv("Итого", "purchaseItem finalName");
+        purchase = createTr("finalPurchase");
+        finalName = createTh("Итого", "purchaseItem finalName");
+        finalName.colSpan="3";
         sum = 0;
         $(".total").each(function() {
             sum += parseFloat(this.innerText);
         });
-        finalPrice = createDiv(sum, "purchaseItem finalPrice");
+        finalPrice = createTh(sum, "purchaseItem finalPrice");
+        finalPrice.colSpan="3";
         purchase.append(finalName);
         purchase.append(finalPrice);
-        $(".purchasesList").append(purchase);
+        tbody.append(purchase);
     }
 
     function createDiv(text = null, className = null) {
@@ -106,6 +146,26 @@ $(document).ready(() => {
         div.innerText = text;
         div.className = className;
         return div;
+    }
+
+    function createTr(className = '') {
+        let tr = $("<tr/>")[0];
+        tr.className = className;
+        return tr;
+    }
+
+    function createTd(text = '', className = '') {
+        let td = $("<td/>")[0];
+        td.className = className;
+        td.innerText = text;
+        return td;
+    }
+
+    function createTh(text = '', className = '') {
+        let th = $("<th/>")[0];
+        th.className = className;
+        th.innerText = text;
+        return th;
     }
 
 });
