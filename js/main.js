@@ -1,7 +1,6 @@
 $(document).ready(() => {
 
-    // $("body").append("<div class='test'/>");
-    main();
+    start();
 
     const namePurchase = $(".nameNewPurchase")[0];
     const pricePurchase = $(".priceNewPurchase")[0];
@@ -10,12 +9,11 @@ $(document).ready(() => {
 
     $(".priceNewPurchase").on("input", changeNewPurchaseTotal);
     $(".amountNewPurchase").on("input", changeNewPurchaseTotal);
-    // amountPurchase.onchange = changeTotal;
-
 
     $(".addNewPurchaseBtn").click(clickAddNewPurchase);
 
-    function main() {
+    function start() {
+        $('.purchasesList').find('tbody').html('');
         readFromStorage();
         createFinal();
     }
@@ -51,6 +49,23 @@ $(document).ready(() => {
             for (let i = 0; i < storage.length; i++) {
                 if (storage[i].id != id) {
                     tempStorage.push(storage[i]);
+                }
+            }
+        }
+        tempStorage = JSON.stringify(tempStorage);
+        localStorage.setItem("purchases", tempStorage);
+    }
+
+    function editPurchase(id, name, price, amount) {
+        let storage = localStorage.getItem("purchases");
+        if (storage) {
+            storage = JSON.parse(storage);
+            tempStorage = [];
+            for (let i = 0; i < storage.length; i++) {
+                if (storage[i].id != id) {
+                    tempStorage.push(storage[i]);
+                } else {
+                    tempStorage.push({ name: name, price: price, amount: amount, id: id });
                 }
             }
         }
@@ -95,26 +110,17 @@ $(document).ready(() => {
         purchase = createTr();
         purchase.id = randId;
         editTd = createTd();
-        editBtn = $(`<button class='purchaseItem ${randId} editBtn btn btn-outline-success px-2.5' disabled>&#9998;</button>`);
-        editBtn.click((editBtn) => {
-            $("#" + editBtn.target.classList[1]).remove();
-            createFinal();
-        });
+        editBtn = createEditBtn(randId);
         editTd.className = "p-0"
         editTd.append(editBtn[0]);
         deleteTd = createTd();
-        deleteBtn = $(`<button class='purchaseItem ${randId} deleteBtn btn btn-outline-danger px-3'>&#10008;</button>`);
-        deleteBtn.click((deleteBtn) => {
-            $("#" + deleteBtn.target.classList[1]).remove();
-            deletePurchaseFromStorage(deleteBtn.target.classList[1]);
-            createFinal();
-        });
+        deleteBtn = createDeleteBtn(randId);
         deleteTd.className = "p-0"
         deleteTd.append(deleteBtn[0]);
-        purchaseName = createTd(name, "purchaseItem");
-        purchasePrice = createTd(price, "purchaseItem");
-        purchaseAmount = createTd(amount, "purchaseItem");
-        purchaseTotal = createTd(total, "purchaseItem total");
+        purchaseName = createTd(name, "purchaseItem item" + randId);
+        purchasePrice = createTd(price, "purchaseItem item" + randId);
+        purchaseAmount = createTd(amount, "purchaseItem item" + randId);
+        purchaseTotal = createTd(total, "purchaseItem total ");
         purchase.append(purchaseName);
         purchase.append(purchasePrice);
         purchase.append(purchaseAmount);
@@ -141,13 +147,45 @@ $(document).ready(() => {
         tbody.append(purchase);
     }
 
-    function createDiv(text = null, className = null) {
-        div = $("<div/>")[0];
-        div.innerText = text;
-        div.className = className;
-        return div;
+    function createDeleteBtn(randId) {
+        let deleteBtn = $(`<button class='purchaseItem ${randId} deleteBtn btn btn-outline-danger px-3'>&#10008;</button>`);
+        deleteBtn.click((deleteBtn) => {
+            $("#" + deleteBtn.target.classList[1]).remove();
+            deletePurchaseFromStorage(deleteBtn.target.classList[1]);
+            createFinal();
+        });
+        return deleteBtn;
     }
 
+    function createEditBtn(randId) {
+        let editBtn = $(`<button class='purchaseItem ${randId} editBtn btn btn-outline-info px-2.5'>&#9998;</button>`);
+        editBtn.click(function() {
+            let className = ".item" + editBtn[0].classList[1];
+            $(className).each(function () {
+                let value = $(this).text();
+                $(this).html(`<input class="edit form-control" value="${value}">`);
+            });
+            editBtn.replaceWith(createAcceptEditBtn(editBtn, className, randId));
+            createFinal();
+        });
+        return editBtn;
+    }
+
+    function createAcceptEditBtn(editBtn, className, id) {
+        let acceptBtn = $("<button class='btn btn-outline-success px-2.5'>&#10003;</button>");
+        acceptBtn.click(function() {
+            let arr = [];
+            $(className).each(function () {
+                let value = $(this).find('input').val();
+                $(this).text(value);
+                arr.push(value);
+            });
+            editPurchase(id, arr[0], arr[1], arr[2]);
+            start();
+        });
+        return acceptBtn;
+    }
+    
     function createTr(className = '') {
         let tr = $("<tr/>")[0];
         tr.className = className;
