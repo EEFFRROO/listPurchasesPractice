@@ -1,16 +1,16 @@
-$(document).ready(() => {
+$(() => {
 
     start();
 
-    const namePurchase = $(".nameNewPurchase")[0];
-    const pricePurchase = $(".priceNewPurchase")[0];
-    const amountPurchase = $(".amountNewPurchase")[0];
-    const totalNewPurchase = $(".totalNewPurchase")[0];
+    const namePurchase = $(".nameNewPurchase");
+    const pricePurchase = $(".priceNewPurchase");
+    const amountPurchase = $(".amountNewPurchase");
+    const totalNewPurchase = $(".totalNewPurchase");
 
-    $(".priceNewPurchase").on("input", changeNewPurchaseTotal);
-    $(".amountNewPurchase").on("input", changeNewPurchaseTotal);
+    pricePurchase.on("input", changeNewPurchaseTotal);
+    amountPurchase.on("input", changeNewPurchaseTotal);
 
-    $(".addNewPurchaseBtn").click(clickAddNewPurchase);
+    $(".addNewPurchaseBtn").on('click', clickAddNewPurchase);
 
     function start() {
         $('.purchasesList').find('tbody').html('');
@@ -35,13 +35,14 @@ $(document).ready(() => {
         } else {
             storage = JSON.parse(storage);
         }
-        data = { name: name, price: price, amount: amount, id: id };
+        let data = { name: name, price: price, amount: amount, id: id };
         storage.push(data);
         storage = JSON.stringify(storage);
         localStorage.setItem("purchases", storage);
     }
 
     function deletePurchaseFromStorage(id) {
+        let tempStorage;
         let storage = localStorage.getItem("purchases");
         if (storage) {
             storage = JSON.parse(storage);
@@ -57,6 +58,7 @@ $(document).ready(() => {
     }
 
     function editPurchase(id, name, price, amount) {
+        let tempStorage;
         let storage = localStorage.getItem("purchases");
         if (storage) {
             storage = JSON.parse(storage);
@@ -74,22 +76,22 @@ $(document).ready(() => {
     }
 
     function clickAddNewPurchase() {
-        if (namePurchase.value && pricePurchase.value && amountPurchase.value) {
-            if (isNaN(parseFloat(pricePurchase.value)))
+        if (namePurchase.val() && pricePurchase.val() && amountPurchase.val()) {
+            if (isNaN(parseFloat(pricePurchase.val())))
                 alert("Неверное введена цена");
-            else if (isNaN(parseInt(amountPurchase.value)))
+            else if (isNaN(parseInt(amountPurchase.val())))
                 alert("Неверное введено количество");
             else {
-                randId = parseInt(Math.random() * 10000);
+                let randId = parseInt(Math.random() * 10000);
                 while ($("#" + randId).length) {
                     randId = parseInt(Math.random() * 10000);
                 }
-                addPurchaseToStorage(namePurchase.value, pricePurchase.value, amountPurchase.value, randId);
-                createNewPurchase(namePurchase.value, pricePurchase.value, amountPurchase.value, randId);
+                addPurchaseToStorage(namePurchase.val(), pricePurchase.val(), amountPurchase.val(), randId);
+                createNewPurchase(namePurchase.val(), pricePurchase.val(), amountPurchase.val(), randId);
                 createFinal();
-                namePurchase.value = "";
-                pricePurchase.value = "";
-                amountPurchase.value = "1";
+                namePurchase.val("");
+                pricePurchase.val("");
+                amountPurchase.val("1");
             }
         } else {
             alert("Заполните все поля");
@@ -97,30 +99,30 @@ $(document).ready(() => {
     }
 
     function changeNewPurchaseTotal() {
-        price = pricePurchase.value;
-        amount = amountPurchase.value;
+        let price = pricePurchase.val();
+        let amount = amountPurchase.val();
         if (!isNaN(parseFloat(price)) && !isNaN(parseInt(amount))) {
-            totalNewPurchase.value = parseFloat(price) * parseInt(amount);
+            totalNewPurchase.val(parseFloat(price) * parseInt(amount));
         }
     }
 
     function createNewPurchase(name, price, amount, randId) {
         let total = parseFloat(price) * parseInt(amount);
-        let tbody = $(".purchasesList tbody")[0];
-        purchase = createTr();
-        purchase.id = randId;
-        editTd = createTd();
-        editBtn = createEditBtn(randId);
-        editTd.className = "p-0"
+        let tbody = $(".purchasesList tbody");
+        let purchase = createTr();
+        purchase.attr({id: randId});
+        let editTd = createTd();
+        let editBtn = createEditBtn(randId);
+        editTd.addClass("p-0");
         editTd.append(editBtn[0]);
-        deleteTd = createTd();
-        deleteBtn = createDeleteBtn(randId);
-        deleteTd.className = "p-0"
+        let deleteTd = createTd();
+        let deleteBtn = createDeleteBtn(randId);
+        deleteTd.addClass("p-0");
         deleteTd.append(deleteBtn[0]);
-        purchaseName = createTd(name, "purchaseItem item" + randId);
-        purchasePrice = createTd(price, "purchaseItem item" + randId);
-        purchaseAmount = createTd(amount, "purchaseItem item" + randId);
-        purchaseTotal = createTd(total, "purchaseItem total ");
+        let purchaseName = createTd(name, "purchaseItem item" + randId);
+        let purchasePrice = createTd(price, "purchaseItem item" + randId);
+        let purchaseAmount = createTd(amount, "purchaseItem item" + randId);
+        let purchaseTotal = createTd(total, "purchaseItem total ");
         purchase.append(purchaseName);
         purchase.append(purchasePrice);
         purchase.append(purchaseAmount);
@@ -131,25 +133,26 @@ $(document).ready(() => {
     }
 
     function createFinal() {
-        let tbody = $('.purchasesList tbody')[0];
+        let tbody = $('.purchasesList tbody');
         $(".finalPurchase").remove();
-        purchase = createTr("finalPurchase");
-        finalName = createTh("Итого", "purchaseItem finalName");
-        finalName.colSpan="3";
-        sum = 0;
+        let purchase = createTr("finalPurchase");
+        let finalName = createTh("Итого", "purchaseItem finalName");
+        finalName.attr({colspan: 3});
+        let sum = 0;
         $(".total").each(function() {
             sum += parseFloat(this.innerText);
         });
-        finalPrice = createTh(sum, "purchaseItem finalPrice");
-        finalPrice.colSpan="3";
+        let finalPrice = createTh(sum, "purchaseItem finalPrice");
+        finalPrice.attr({colspan: 3});
         purchase.append(finalName);
         purchase.append(finalPrice);
+
         tbody.append(purchase);
     }
 
     function createDeleteBtn(randId) {
         let deleteBtn = $(`<button class='purchaseItem ${randId} deleteBtn btn btn-outline-danger px-3'>&#10008;</button>`);
-        deleteBtn.click((deleteBtn) => {
+        deleteBtn.on('click', (deleteBtn) => {
             $("#" + deleteBtn.target.classList[1]).remove();
             deletePurchaseFromStorage(deleteBtn.target.classList[1]);
             createFinal();
@@ -159,7 +162,7 @@ $(document).ready(() => {
 
     function createEditBtn(randId) {
         let editBtn = $(`<button class='purchaseItem ${randId} editBtn btn btn-outline-info px-2.5'>&#9998;</button>`);
-        editBtn.click(function() {
+        editBtn.on('click', function() {
             let className = ".item" + editBtn[0].classList[1];
             $(className).each(function () {
                 let value = $(this).text();
@@ -173,7 +176,7 @@ $(document).ready(() => {
 
     function createAcceptEditBtn(editBtn, className, id) {
         let acceptBtn = $("<button class='btn btn-outline-success px-2.5'>&#10003;</button>");
-        acceptBtn.click(function() {
+        acceptBtn.on('click', function() {
             let arr = [];
             $(className).each(function () {
                 let value = $(this).find('input').val();
@@ -187,22 +190,22 @@ $(document).ready(() => {
     }
     
     function createTr(className = '') {
-        let tr = $("<tr/>")[0];
-        tr.className = className;
+        let tr = $("<tr/>");
+        tr.addClass(className);
         return tr;
     }
 
     function createTd(text = '', className = '') {
-        let td = $("<td/>")[0];
-        td.className = className;
-        td.innerText = text;
+        let td = $("<td/>");
+        td.addClass(className);
+        td.text(text);
         return td;
     }
 
     function createTh(text = '', className = '') {
-        let th = $("<th/>")[0];
-        th.className = className;
-        th.innerText = text;
+        let th = $("<th/>");
+        th.addClass(className);
+        th.text(text);
         return th;
     }
 
